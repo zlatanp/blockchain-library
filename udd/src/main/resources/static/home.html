@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <link rel="stylesheet" href="html/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="html/css/bootstrap-theme.min.css" />
+    <link rel="stylesheet" href="html/css/toastr.css" />
+    <link rel="stylesheet" href="html/css/toastr.min.css" />
+    <script src="html/js/jquery-3.1.0.min.js"></script>
+    <script src="html/js/jquery.min.js"></script>
+    <script src="html/js/bootstrap.js"></script>
+    <script src="html/js/bootstrap.min.js"></script>
+    <script src="html/js/toastr.js"></script>
+    <script src="html/js/toastr.min.js"></script>
+
+    <link rel="stylesheet" href="html/css/animate.css" type="text/css" />
+
+    <link rel="stylesheet" href="html/css/rmodal.css" type="text/css" />
+    <script type="text/javascript" src="html/js/rmodal.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="html/css/looknfeel.css">
+    <meta charset="ISO-8859-1">
+
+    <title>Index Page</title>
+    <script type="text/javascript">
+
+var x = document.cookie;
+var parts = x.split("email@");
+var cookie = parts[1];
+
+if("undefined" !== typeof cookie){
+    window.location.href="index.html";
+}
+
+        window.onload = function() {
+            var modal = new RModal(document.getElementById('modal'), {
+                //content: 'Abracadabra'
+                beforeOpen: function(next) {
+                    console.log('beforeOpen');
+                    next();
+                }
+                , afterOpen: function() {
+                    console.log('opened');
+                }
+
+                , beforeClose: function(next) {
+                    console.log('beforeClose');
+                    next();
+                }
+                , afterClose: function() {
+                    console.log('closed');
+                }
+                // , bodyClass: 'modal-open'
+                // , dialogClass: 'modal-dialog modal-dialog-lg'
+                // , dialogOpenClass: 'animated fadeIn'
+                // , dialogCloseClass: 'animated fadeOut'
+
+                // , focus: true
+                // , focusElements: ['input.form-control', 'textarea', 'button.btn-primary']
+
+                // , escapeClose: true
+            });
+
+            document.addEventListener('keydown', function(ev) {
+                modal.keydown(ev);
+            }, false);
+
+            document.getElementById('showModal').addEventListener("click", function(ev) {
+                ev.preventDefault();
+                modal.open();
+            }, false);
+
+            window.modal = modal;
+
+
+        }
+    </script>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+    </div>
+</div>
+<br>
+<br>
+<div class="container">
+    <div class="row">
+        <div class="col-md-4 col-md-offset-4">
+            <div class="form-body">
+                <ul class="nav nav-tabs final-login">
+                    <li class="active"><a data-toggle="tab" href="#sectionA">Sign In</a></li>
+                    <li><a data-toggle="tab" href="#sectionB">Join us!</a></li>
+                </ul>
+                <div class="tab-content">
+                    <div id="sectionA" class="tab-pane fade in active">
+                        <div class="innter-form">
+                            <div class="sa-innate-form">
+                                <label>Email</label>
+                                <input type="text" name="email">
+                                <label>Password</label>
+                                <input type="password" name="password">
+                                <button type="submit" onclick="return loginFunction()">Sign In</button>
+                                <a href="" id="showModal">Forgot Password?</a>
+                                <button type="backToSite" onclick="return backToSite()">Go Back</button>
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div id="sectionB" class="tab-pane fade">
+                        <div class="innter-form">
+                            <div class="sa-innate-form" >
+                                <label>Email</label>
+                                <input type="email" name="emailRegister">
+                                <label>Password</label>
+                                <input type="password" name="passwordRegister">
+                                <label>Confirm Password</label>
+                                <input type="password" name="password1Register">
+                                <label>Name</label>
+                                <input type="text" name="nameRegister">
+                                <label>Lastname</label>
+                                <input type="text" name="lastnameRegister">
+                                <label>City</label>
+                                <input type="text" name="cityRegister">
+                                <label>Country</label>
+                                <input type="text" name="countryRegister">
+                                <label>Type</label>
+                                <select id="typeSelect">
+                                    <option value="student">Student</option>
+                                    <option value="professor">Professor</option>
+                                </select>
+                                <button type="submit" onclick="return registerFunction()">Join now</button>
+                                <p>By clicking Join now, you agree to Restaurant's User Agreement, Privacy Policy, and Cookie Policy.</p>
+                                <button type="backToSite" onclick="return backToSite()">Go Back</button>
+                            </div>
+                        </div>
+                        <br>
+                        <br>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modal" class="modal">
+    <div class="modal-dialog animated">
+        <div class="modal-content">
+            <form class="form-horizontal" method="get" action="korisnik/recover">
+                <div class="modal-header">
+                    <strong>Forgot Password?</strong>
+                </div>
+
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="dummyText" class="control-label col-xs-4">Enter your email adress and we'll send you password:</label>
+                        <div class="input-group col-xs-7">
+                            <input type="text" name="email" id="email" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-default" type="button" onclick="modal.close();">Cancel</button>
+                    <button class="btn btn-primary" type="submit" onclick="modal.close();">Recover password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+
+   function loginFunction(){
+    	var i = document.getElementsByName('email');
+    	var emailValue = i[0].value;
+    	var j = document.getElementsByName('password');
+    	var passValue = j[0].value;
+
+
+     	if(email!="" && passValue!=""){
+     	$.ajax({
+            type: 'POST',
+            url: 'user/login',
+            dataType: 'json',
+            data: {email : emailValue, password : passValue},
+     		success: function(data){
+             	console.log(data);
+            },
+            complete: function(data){
+    		            var response = data.responseText;
+    		            console.log(response);
+    		            if(response == "nill")
+    		                toastr.error("Some fields are empty!")
+
+    		            if(response == "nouser")
+    		                toastr.error("User with username: " +emailValue+ " does not exist!")
+
+    		             if(response == "badpass")
+    		                toastr.info("Bad password!")
+
+    		            if(response == "student"){
+    		                toastr.success("Successful login!")
+    		                document.cookie = "email@student#" + emailValue;
+    		                setTimeout(location.reload.bind(location), 1500);
+    		            }
+
+    		            if(response == "professor"){
+    		                toastr.success("Successful login!")
+    		                document.cookie = "email@professor#" + emailValue;
+    		                setTimeout(location.reload.bind(location), 1500);
+    		            }
+
+    		            if(response == "admin"){
+    		                toastr.success("Successful login!")
+    		                document.cookie = "email@admin#" + emailValue;
+    		                setTimeout(location.reload.bind(location), 1500);
+    		            }
+
+    		 }
+     	});
+     	}else{
+     		toastr.error("Email or password can't be empty!");
+     	}
+
+    }
+
+    function registerFunction(){
+
+    	var i = document.getElementsByName('emailRegister');
+    	var emailValue = i[0].value;
+
+    	var j = document.getElementsByName('passwordRegister');
+    	var passwordValue = j[0].value;
+
+    	var k = document.getElementsByName('password1Register');
+    	var password1Value = k[0].value;
+
+    	var l = document.getElementsByName('nameRegister');
+    	var nameValue = l[0].value;
+
+    	var m = document.getElementsByName('lastnameRegister');
+    	var lastnameValue = m[0].value;
+
+    	var n = document.getElementsByName('cityRegister');
+    	var cityValue = n[0].value;
+
+        var o = document.getElementsByName('countryRegister');
+    	var countryValue = o[0].value;
+
+    	var type = $('#typeSelect').find(":selected").text();
+
+        var area = [];
+        if(type == "Professor"){
+            $.each($("#areaCodesSelect option:selected"), function(){
+                area.push($(this).val());
+            });
+            //alert("You have selected the country - " + area.join(", "));
+        }else{
+            area.push("empty");
+        }
+
+    	if(emailValue=="" || passwordValue=="" || password1Value=="" || nameValue=="" || lastnameValue=="" || cityValue=="" || countryValue==""){
+    		toastr.error("You must enter all fields!");
+    		return false;
+        }else{
+        	if(passwordValue.length <8){
+        		toastr.error("Password must contain 8-30 characters!")
+        		return false;
+        	}
+        	if(passwordValue.length > 30){
+        		toastr.error("Password must contain 8-30 characters!")
+        		return false;
+        	}
+
+        	if(passwordValue != password1Value){
+        		toastr.error("Password does not match the confirm password!")
+        		return false;
+        	}
+        }
+
+        $.ajax({
+            type: 'POST',
+            url: 'user/register',
+            dataType: 'json',
+            data: {email : emailValue, pass : passwordValue, passRepeat : password1Value, firstName : nameValue, lastName : lastnameValue, city : cityValue, country : countryValue, type : type, area : area},
+            success: function(data){
+                        console.log(data);
+                        //location.reload();
+            },
+            complete: function(data){
+                        var response = data.responseText;
+                        console.log(response);
+                        if(response == "nill")
+                            toastr.error("Some fields are empty!")
+
+                        if(response == "passwordmatch")
+                            toastr.error("Password doesn't match!")
+
+                         if(response == "used")
+                            toastr.info("Username already used!")
+
+                        if(response == "ok"){
+                            toastr.success("Successful registration!")
+                            setTimeout(location.reload.bind(location), 2500);
+                        }
+
+            }
+        });
+    }
+
+    function backToSite(){
+        window.location.href="index.html";
+    }
+
+
+    </script>
+
+</body>
+</html>

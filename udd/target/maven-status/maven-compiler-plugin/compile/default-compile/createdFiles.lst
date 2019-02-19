@@ -1,0 +1,7 @@
+com/ftn/udd/model/Journal.class
+com/ftn/udd/model/Article.class
+com/ftn/udd/model/User.class
+com/ftn/udd/enumeration/PayTypeEnum.class
+com/ftn/udd/model/AreaCode.class
+com/ftn/udd/UddApplication.class
+com/ftn/udd/enumeration/UserType.class

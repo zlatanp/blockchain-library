@@ -1,0 +1,119 @@
+.carousel-inner > .item > img {
+    margin: 0 auto;
+}
+
+.slajdTekst{
+    font-size: 20px;
+	text-shadow: 3px 2px black;
+}
+
+.registerForma{
+	margin: 0 auto;
+	width: 30%;
+}
+
+.col-form-label{
+	width: 23%;
+}
+
+.col-xs-10{
+	width: 50%;
+}
+
+.dugmad{
+    width: 50%;
+    margin: 0 auto;
+}
+
+#dugme{
+	text-decoration: none;
+  	color: initial;
+}
+
+.loginDugmad{
+	 position: absolute;
+ 	 left: 50%;
+ 	 margin-left: -100px;
+}
+
+.naslovPD{
+	width: 25%;
+    margin: 0 auto;
+}
+
+.sidebar {
+width: 250px;
+}
+
+#cpDugmad{
+    width: 50%;
+    margin: 0 auto;
+}
+
+/* Three image containers (use 25% for four, and 50% for two, etc) */
+/*.column {
+  float: left;
+  width: 33.33%;
+  padding: 5px;
+}
+
+/* Clear floats after image containers */
+/*#magazineTable::after {
+  content: "";
+  clear: both;
+  display: table;
+}*/
+
+#magazineTable{
+    display: grid;
+    grid-column-gap: 10px;
+    grid-template-columns: auto auto auto;
+    padding: 10px;
+}
+
+.zoom {
+  padding: 25px;
+  transition: transform .2s;
+  max-width:600px;
+  max-height: 600px;
+  margin: 0 auto;
+}
+
+.zoom:hover {
+  -ms-transform: scale(1.5); /* IE 9 */
+  -webkit-transform: scale(1.5); /* Safari 3-8 */
+  transform: scale(1.5);
+}
+
+.aboutMagazinePic{
+    max-width:250px;
+    max-height: 250px;
+}
+
+#aboutMagazine{
+    color: black;
+}
+
+.authorCenter{
+    color: red;
+}
+
+#searchDiv{
+    color: black;
+}
+
+.profesorLeft{
+    color: red;
+}
+
+#searchDivResult{
+    text-align:center;
+}
+
+#allArticles{
+    text-align:center;
+}
+
+.highlightER{
+    background-color: yellow;
+}
