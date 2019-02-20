@@ -101,6 +101,7 @@ function searchItems(){
     $("#dialog2").dialog('close');
     $('#searchDiv').show();
     $('.adminLeft').hide();
+    $('.profesorLeft').hide();
     $('#searchKeywords').tagsInput({'width':'220px' });
     $('#searchAuthors').tagsInput({'width':'220px' });
     $('#searchMembers').tagsInput({'width':'220px' });
@@ -138,6 +139,7 @@ function searchSomeArticles(){
     $('#allArticles').hide();
     $("#articleTableSearch tbody").empty();
     $('#searchDivResult').show();
+    $('#reviewDivResult').hide();
 
     var searchTerms = [];
 
