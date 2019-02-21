@@ -202,6 +202,7 @@
                                 <th scope="col">Keywords</th>
                                 <th scope="col">Committee Members</th>
                                 <th scope="col">Signed By:</th>
+                                <th scope="col">Attachment</th>
                             </tr>
                             </thead>
                             <tbody></tbody>
@@ -243,7 +244,7 @@
                             </thead>
                             <tbody></tbody>
                         </table>
-                        <button onclick="return signSelectedArticles()">Sign Selected Articles</button>
+                        <button onclick="return signSelectedArticlesPinShow()">Sign Selected Articles</button>
                     </div>
                 </div>
             </form>
@@ -261,6 +262,13 @@
         <br>
         <br>
         <button onclick="return addNewAreaCode()" id="dialogAdd">Save</button>
+    </div>
+
+    <div id="dialog2" title="Enter Your Pin">
+        <input name="dPinCode" type="password" id="dPinCode">
+        <br>
+        <br>
+        <button onclick="return signSelectedArticles()" id="dialogPin">Sign!</button>
     </div>
 
     <div id="dialog3" title="Add new Article">

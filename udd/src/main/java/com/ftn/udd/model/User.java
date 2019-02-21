@@ -19,6 +19,9 @@ public class User {
     private String city;
     private String country;
     private UserType userType;
+    private String privateKey;
+    private String publicKey;
+    private String pinCode;
 
     public User(String email, String password, String firstName, String lastName, String city, String country, UserType userType) {
         this.email = email;

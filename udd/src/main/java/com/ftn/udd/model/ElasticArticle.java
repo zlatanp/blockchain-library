@@ -25,6 +25,7 @@ public class ElasticArticle {
     private List<User> signedBy;
     private String filename;
     private String content;
+    private String status;
 
 
     public ElasticArticle(Article article) {
@@ -37,5 +38,6 @@ public class ElasticArticle {
         this.signedBy = article.getSignedBy();
         this.filename = article.getId();
         this.content = article.getContent();
+        this.status = article.getStatus();
     }
 }

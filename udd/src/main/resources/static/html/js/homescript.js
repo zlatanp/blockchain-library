@@ -37,6 +37,21 @@ $(document).ready(function(){
 
       });
 
+      $( function() {
+            $("#dialog2").dialog({
+                 autoOpen: false,
+                 show: {
+                     effect: "blind",
+                     duration: 500
+                     },
+                 hide: {
+                     effect: "explode",
+                     duration: 500
+                     }
+            });
+
+        });
+
      $( function() {
           $("#dialog3").dialog({
                autoOpen: false,
@@ -222,11 +237,12 @@ function searchSomeArticles(){
             console.log(data);
             var resultSize = data.hits.total;
             if(resultSize == 0){
-                $("#articleTableSearch").append("<tr><td colspan=\"6\" style=\"color:red\"><p><b>No Results!</b></p></td></tr>");
+                $("#articleTableSearch").append("<tr><td colspan=\"7\" style=\"color:red\"><p><b>No Results!</b></p></td></tr>");
             }else{
                 var resultList = data.hits.hits;
                 console.log(resultList);
                 for(var i =0; i<resultList.length; i++){
+                    var statisResult = resultList[i]._source.status;
                     var titleResult = resultList[i]._source.title;
                     var authorsResult = resultList[i]._source.author;
                     var apstractResult = resultList[i]._source.apstract
@@ -241,7 +257,8 @@ function searchSomeArticles(){
                     //Highlight
                     var context = document.querySelector('#articleTableSearch'); // requires an element with class "context" to exist
                     var instance = new Mark(context);
-                    instance.mark(searchTerms, {  "element": "span",
+                    instance.mark(searchTerms, {  "accuracy": "exactly",
+                                                  "element": "span",
                                                   "className": "highlightER"
                                                }
                                  );
@@ -250,8 +267,12 @@ function searchSomeArticles(){
                            $('#'+ filename + 'signedusers').append("Not yet Signed!");
                     }else{
                         for(var p =0; p<signedByResult.length; p++){
-                            $('#'+ filename + 'signedusers').append(signedByResult[p].firstName + ' ' + signedByResult[p].lastName + '; ');
-                        }
+                            if(p == signedByResult.length-1){
+                                $('#'+ filename + 'signedusers').append(signedByResult[p].firstName + ' ' + signedByResult[p].lastName);
+                            }else{
+                                $('#'+ filename + 'signedusers').append(signedByResult[p].firstName + ' ' + signedByResult[p].lastName + ', ');
+                            }
+                       }
                     }
 
                     $.ajax({
@@ -287,17 +308,21 @@ function getAllArticles(){
                for(var i =0; i<data.length; i++){
                     var ide = data[i].id;
                     var signedByResult = data[i].signedBy;
-                    $("#articleTable").append('<tr><td>' + data[i].title + '</td><td>' + data[i].author.firstName + ' ' + data[i].author.lastName + '</td><td>' + data[i].apstract + '</td><td>' + data[i].keywords + '</td><td>' + data[i].committeeMembers[0].firstName + ' ' + data[i].committeeMembers[0].lastName +', ' +  data[i].committeeMembers[1].firstName + ' ' + data[i].committeeMembers[1].lastName +', ' + data[i].committeeMembers[2].firstName + ' ' + data[i].committeeMembers[2].lastName + '</td><td id=' + ide + 'signedusers1></td></tr>');
+                    $("#articleTable").append('<tr><td>' + data[i].title + '</td><td>' + data[i].author.firstName + ' ' + data[i].author.lastName + '</td><td>' + data[i].apstract + '</td><td>' + data[i].keywords + '</td><td>' + data[i].committeeMembers[0].firstName + ' ' + data[i].committeeMembers[0].lastName +', ' +  data[i].committeeMembers[1].firstName + ' ' + data[i].committeeMembers[1].lastName +', ' + data[i].committeeMembers[2].firstName + ' ' + data[i].committeeMembers[2].lastName + '</td><td id=' + ide + 'signedusers1></td><td><a href="#" onclick="openAttachment(\''+ data[i].file.data +'\')">Open PDF</a></td></tr>');
                     if(signedByResult.length == 0){
                         $('#'+ ide + 'signedusers1').append("Not yet Signed!");
                     }else{
                         for(var p =0; p<signedByResult.length; p++){
-                            $('#'+ ide + 'signedusers1').append(signedByResult[p].firstName + ' ' + signedByResult[p].lastName + '; ');
+                            if(p == signedByResult.length-1){
+                                $('#'+ ide + 'signedusers1').append(signedByResult[p].firstName + ' ' + signedByResult[p].lastName);
+                            }else{
+                                $('#'+ ide + 'signedusers1').append(signedByResult[p].firstName + ' ' + signedByResult[p].lastName + ', ');
+                            }
                        }
                     }
                }
            }else{
-               $("#articleTable").append('<tr><td colspan=\"5\" style=\"color:red\"><b>No Articles!</b></td></tr>');
+               $("#articleTable").append('<tr><td colspan=\"7\" style=\"color:red\"><b>No Articles!</b></td></tr>');
            }
        }
    });
@@ -568,22 +593,48 @@ function reviewArticles(){
     });
 }
 
+function signSelectedArticlesPinShow(){
+    var checkedValue = [];
+    $.each($("input[name='checkedboxs']:checked"), function(){
+        checkedValue.push($(this).val());
+    });
+
+    if(checkedValue.length > 0){
+        $("#dialog2").dialog('open');
+    }else{
+        toastr.error("You must select Articles for signing!")
+    }
+
+    return false;
+}
+
 function signSelectedArticles(){
     var checkedValue = [];
     $.each($("input[name='checkedboxs']:checked"), function(){
         checkedValue.push($(this).val());
     });
+
+    var i = document.getElementsByName('dPinCode');
+    var pinCode = i[0].value;
+
     $.ajax({
         type: 'POST',
         url: 'article/signArticles',
         dataType: 'json',
-        data: {email : email, ids : checkedValue.join()},
-        success: function(data){
-            console.log(data);
+        data: {email : email, pin : pinCode, ids : checkedValue.join()},
+        complete: function(data){
+        console.log(data);
+            if(data.responseText == "OK"){
+                toastr.success("Articles Successfuly Signed!");
+                $("#dialog2").dialog('close');
+                setTimeout(location.reload.bind(location), 1500);
+            }else{
+                toastr.error("BAD PIN!")
+            }
         }
     });
-
     return false;
+
 }
 
 function openAttachment(data){

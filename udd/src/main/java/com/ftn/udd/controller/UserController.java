@@ -1,5 +1,6 @@
 package com.ftn.udd.controller;
 
+import com.ftn.udd.config.GenerateKeys;
 import com.ftn.udd.enumeration.UserType;
 import com.ftn.udd.model.User;
 import com.ftn.udd.repository.AreaCodeRepository;
@@ -10,6 +11,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.util.Base64;
 import java.util.List;
 
 @RestController
@@ -21,6 +25,8 @@ public class UserController {
 
     @Autowired
     private AreaCodeRepository areaCodeRepository;
+
+    GenerateKeys generateKeys;
 
     @RequestMapping(value = "/login", method = RequestMethod.POST, produces = "application/json")
     public String login(@RequestParam("email") String email, @RequestParam("password") String password){
@@ -64,6 +70,20 @@ public class UserController {
                 userRepository.save(user);
             }else if (type.equals("Professor")) {
                 User user = new User(email, pass, firstname, lastName, city, country, UserType.PROFESSOR);
+                GenerateKeys gk;
+                try {
+                    gk = new GenerateKeys(1024);
+                    gk.createKeys();
+                    user.setPrivateKey(Base64.getEncoder().encodeToString(gk.getPrivateKey().getEncoded()));
+                    user.setPublicKey(Base64.getEncoder().encodeToString(gk.getPublicKey().getEncoded()));
+
+                    String publicKey = new String(Base64.getEncoder().encode(gk.getPublicKey().getEncoded()));
+                    user.setPinCode(publicKey.replaceAll("[^0-9]", "").substring(publicKey.replaceAll("[^0-9]", "").length()-4,publicKey.replaceAll("[^0-9]", "").length()));
+
+                    //byte[] encodedKey = Base64.getDecoder().decode(temp);
+                } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+                    System.err.println(e.getMessage());
+                }
                 userRepository.save(user);
             }
             return "ok";

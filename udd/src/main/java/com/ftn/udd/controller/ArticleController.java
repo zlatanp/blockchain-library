@@ -10,15 +10,23 @@ import com.ftn.udd.repository.UserRepository;
 import com.ftn.udd.service.MultipartToPDF;
 import org.bson.BsonBinarySubType;
 import org.bson.types.Binary;
+import org.elasticsearch.client.Client;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.reindex.DeleteByQueryAction;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.security.*;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 
 @RestController
@@ -33,6 +41,9 @@ public class ArticleController {
 
     @Autowired
     private ArticleRepository articleRepository;
+
+    @Autowired
+    private ElasticsearchOperations es;
 
     @Autowired
     private ElasticArticleRepository elasticArticleRepository;
@@ -55,7 +66,7 @@ public class ArticleController {
         article.setKeywords(Arrays.asList(dArticleKeywords));
         article.setApstract(dArticleAbstract);
         article.setAreaCode(areaCodeRepository.findByName(dArticleAreaCodes));
-        article.setStatus("PENDING");
+        article.setStatus("ACTIVE");
 
         ArrayList<User> commiteeMembers = new ArrayList<User>();
         commiteeMembers.add(userRepository.findByEmail(DfirstCommittee));
@@ -86,7 +97,15 @@ public class ArticleController {
 
     @RequestMapping(value = "/getAll", method = RequestMethod.GET, produces = "application/json")
     public List<Article> getAll(HttpServletResponse response){
-        return articleRepository.findAll();
+        List<Article> allArticles = articleRepository.findAll();
+        ArrayList<Article> articles = new ArrayList<Article>();
+        for (Article a: allArticles) {
+            if(a.getStatus().equals("ACTIVE")){
+                articles.add(a);
+            }
+        }
+
+        return articles;
     }
 
     @RequestMapping(value = "/deleteArticle", method = RequestMethod.POST, produces = "application/json")
@@ -108,7 +127,14 @@ public class ArticleController {
 
         ArrayList<Article> pendingArticles = new ArrayList<Article>();
 
-        List<Article> articles = articleRepository.findAll();
+        List<Article> allArticles = articleRepository.findAll();
+        ArrayList<Article> articles = new ArrayList<Article>();
+        for (Article a: allArticles) {
+            if(a.getStatus().equals("ACTIVE")){
+                articles.add(a);
+            }
+        }
+
         for (Article a: articles) {
             List<User> comitteeMembers = a.getCommitteeMembers();
             List<User> reviewedMembers = a.getSignedBy();
@@ -132,11 +158,70 @@ public class ArticleController {
     }
 
     @RequestMapping(value = "/signArticles", method = RequestMethod.POST, produces = "application/json")
-    public void getArticleById(HttpServletResponse response, @RequestParam("email") String email, @RequestParam("ids") String ids){
+    public String getArticleById(@RequestParam("email") String email, @RequestParam("pin") String pin, @RequestParam("ids") String ids) {
 
-        System.out.println(email);
-        System.out.println(ids);
+        User user = userRepository.findByEmail(email);
+        if (user != null && user.getPinCode().equals(pin)){
+            //do the stuff
+            List<String> articleIds = Arrays.asList(ids.split(","));
+            for (String id: articleIds) {
+                Article article = articleRepository.findById(id).get();
+                Article articleToSave = new Article(article);
+                article.setStatus("DELETED");
 
+                //Delete old in MongoDB and ElasticSearch
+                Client client = es.getClient();
+                DeleteByQueryAction.INSTANCE.newRequestBuilder(client)
+                                .filter(QueryBuilders.matchQuery("filename", article.getId()))
+                                .source("article")
+                                .get();
+                articleRepository.save(article);
+
+                //Update new
+                try {
+                    articleToSave.getSignatures().add(sign(articleToSave, user));
+                    articleToSave.getSignedBy().add(user);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                //save New in MongoDB, ElasticSearch and Blockchain
+                articleRepository.save(articleToSave);
+                ElasticArticle elasticArticle = new ElasticArticle(articleToSave);
+                elasticArticleRepository.save(elasticArticle);
+                String restCall = restTemplate.postForObject("http://localhost:8090/blockchain/add/"+articleToSave.getId(),null, String.class);
+            }
+            return "OK";
+        }else{
+            return "BADPIN";
+        }
+
+
+    }
+
+    public String sign(Article articleToSave, User user) throws Exception{
+
+        byte[] privateKeyBytes = Base64.getDecoder().decode(user.getPrivateKey());
+        byte[] publicKeyBytes = Base64.getDecoder().decode(user.getPublicKey());
+        KeyFactory kf = KeyFactory.getInstance("RSA"); // or "EC" or whatever
+        PrivateKey privateKey = kf.generatePrivate(new PKCS8EncodedKeySpec(privateKeyBytes));
+        PublicKey publicKey = kf.generatePublic(new X509EncodedKeySpec(publicKeyBytes));
+
+        byte[] pdf = articleToSave.getFile().getData();
+
+        Signature instance = Signature.getInstance("SHA256withRSA");
+        instance.initSign(privateKey, new SecureRandom());
+        instance.update(pdf);
+        byte[] signature = instance.sign();
+        articleToSave.setFile(new Binary(BsonBinarySubType.BINARY, pdf));
+
+        instance.initVerify(publicKey);
+        instance.update(pdf);
+
+        System.out.println(Base64.getEncoder().encodeToString(signature));
+        System.out.println(instance.verify(signature));
+
+        return Base64.getEncoder().encodeToString(signature);
     }
 
 }
