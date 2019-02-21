@@ -12,6 +12,7 @@ import org.bson.BsonBinarySubType;
 import org.bson.types.Binary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -37,6 +38,7 @@ public class ArticleController {
     private ElasticArticleRepository elasticArticleRepository;
 
     private MultipartToPDF multipartToPDF = new MultipartToPDF();
+    RestTemplate restTemplate = new RestTemplate();
 
     @PostMapping("/add")
     public void addArticleWitAuthors(HttpServletResponse response, @RequestParam("dArticleTitle") String dArticleTitle, @RequestParam("dArticleAuthor") String dArticleAuthor, @RequestParam("dArticleKeywords") String[] dArticleKeywords, @RequestParam("dArticleAbstract") String dArticleAbstract, @RequestParam("dArticleAreaCodes") String dArticleAreaCodes, @RequestParam("file") MultipartFile file,
@@ -71,9 +73,10 @@ public class ArticleController {
         }
 
         articleRepository.save(article);
-
+        String restCall = restTemplate.postForObject("http://localhost:8090/blockchain/add/"+article.getId(),null, String.class);
         ElasticArticle elasticArticle = new ElasticArticle(article);
         elasticArticleRepository.save(elasticArticle);
+
 
         response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
         response.setHeader("Location", "http://localhost:8080/");
@@ -96,7 +99,7 @@ public class ArticleController {
     @RequestMapping(value = "/getArticleById", method = RequestMethod.GET, produces = "application/json")
     public Article getArticleById(HttpServletResponse response, @RequestParam("id") String id){
 
-       return articleRepository.findById(id).get();
+       return articleRepository.findById(id).orElseGet(null);
 
     }
 
@@ -133,7 +136,6 @@ public class ArticleController {
 
         System.out.println(email);
         System.out.println(ids);
-
 
     }
 
